@@ -1,8 +1,9 @@
-use glfw::{Action, Context, Key};
+use glfw::{Context};
 
 use std::ffi::{CString};
 use std::{ptr};
 use gl::types::{GLsizei};
+use opengl_book_examples::utils::{handle_window_event};
 
 const VERTEX_SHADER_SOURCE: &str = r#"
     #version 330 core
@@ -258,26 +259,5 @@ fn main() {
         // Check call events and swap the buffers
         glfw.poll_events();
         window.swap_buffers();
-    }
-}
-
-fn handle_window_event(window: &mut glfw::Window, event: glfw::WindowEvent, wireframe_mode: &mut bool) {
-    match event {
-        glfw::WindowEvent::FramebufferSize(width, height) => {
-            unsafe { gl::Viewport(0, 0, width, height) }
-        }
-        glfw::WindowEvent::Key(Key::Escape, _, Action::Press, _) => {
-            window.set_should_close(true)
-        }
-        glfw::WindowEvent::Key(Key::W, _, Action::Press, _) => {
-            // WireFrame mod
-            if *wireframe_mode {
-                unsafe { gl::PolygonMode(gl::FRONT_AND_BACK, gl::FILL); }
-            } else {
-                unsafe { gl::PolygonMode(gl::FRONT_AND_BACK, gl::LINE); }
-            }
-            *wireframe_mode = !*wireframe_mode;
-        }
-        _ => {}
     }
 }

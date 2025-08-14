@@ -1,9 +1,9 @@
 use std::ffi::CString;
 use std::path::Path;
 use std::ptr;
-use gl::types::{GLsizei, GLuint};
-use glfw::{Action, Context, Key};
+use glfw::{Context};
 use opengl_book_examples::shaders::{ShaderProgram, Shader, ShaderType};
+use opengl_book_examples::utils::{handle_window_event};
 
 fn main() {
     let mut glfw = glfw::init(glfw::fail_on_errors).unwrap();
@@ -48,7 +48,7 @@ fn main() {
     };
 
     let vao= unsafe {
-        let mut internal_vao: GLuint = 0;
+        let mut internal_vao: u32 = 0;
         let vertices: [f32; 18] = [
             // position      // colors
             -0.5, -0.5, 0.0, 1.0, 0.0, 0.0,
@@ -84,7 +84,7 @@ fn main() {
             3,
             gl::FLOAT,
             gl::FALSE,
-            6 * size_of::<f32>() as GLsizei,
+            6 * size_of::<f32>() as i32,
             ptr::null()
         );
         gl::EnableVertexAttribArray(0);
@@ -95,7 +95,7 @@ fn main() {
             3,
             gl::FLOAT,
             gl::FALSE,
-            6 * size_of::<f32>() as GLsizei,
+            6 * size_of::<f32>() as i32,
             (3 * size_of::<f32>()) as *const _
         );
         gl::EnableVertexAttribArray(1);
@@ -103,10 +103,11 @@ fn main() {
         internal_vao
     };
 
+    let mut wireframe_mode = false;
     while !window.should_close() {
         // Input
         for (_, event) in glfw::flush_messages(&events) {
-            handle_window_event(&mut window, event);
+            handle_window_event(&mut window, event, &mut wireframe_mode);
         }
 
         // Rendering
@@ -132,17 +133,5 @@ fn main() {
         // Check call events and swap the buffers
         glfw.poll_events();
         window.swap_buffers();
-    }
-}
-
-fn handle_window_event(window: &mut glfw::Window, event: glfw::WindowEvent) {
-    match event {
-        glfw::WindowEvent::FramebufferSize(width, height) => {
-            unsafe { gl::Viewport(0, 0, width, height) }
-        }
-        glfw::WindowEvent::Key(Key::Escape, _, Action::Press, _) => {
-            window.set_should_close(true)
-        }
-        _ => {}
     }
 }

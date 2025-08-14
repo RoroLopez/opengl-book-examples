@@ -220,3 +220,29 @@ pub mod shaders {
         }
     }
 }
+
+pub mod utils {
+    use glfw::{Action, Key};
+
+    // Wireframe parameter is just for fun, must replace with better key
+    pub fn handle_window_event(window: &mut glfw::Window, event: glfw::WindowEvent, wireframe_mode: &mut bool) {
+        match event {
+            glfw::WindowEvent::FramebufferSize(width, height) => {
+                unsafe { gl::Viewport(0, 0, width, height) }
+            }
+            glfw::WindowEvent::Key(Key::Escape, _, Action::Press, _) => {
+                window.set_should_close(true)
+            }
+            glfw::WindowEvent::Key(Key::W, _, Action::Press, _) => {
+                // WireFrame mod
+                if *wireframe_mode {
+                    unsafe { gl::PolygonMode(gl::FRONT_AND_BACK, gl::FILL); }
+                } else {
+                    unsafe { gl::PolygonMode(gl::FRONT_AND_BACK, gl::LINE); }
+                }
+                *wireframe_mode = !*wireframe_mode;
+            }
+            _ => {}
+        }
+    }
+}

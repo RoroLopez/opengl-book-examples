@@ -1,12 +1,9 @@
-use glfw::{Action, Context, Key};
+use glfw::{Context};
 use opengl_book_examples::utils::{handle_window_event};
 
-/// This file is the basis for all the exercises of OpenGL as well as the loop for processing
-/// any user input. The main loop consists always of taking Input, Rendering and Check call events
-/// with swap buffers for smoother FPS transitions
 fn main() {
     let mut glfw = glfw::init(glfw::fail_on_errors).unwrap();
-    glfw.window_hint(glfw::WindowHint::ContextVersion(3,3));
+    glfw.window_hint(glfw::WindowHint::ContextVersion(4,1));
     glfw.window_hint(glfw::WindowHint::OpenGlProfile(glfw::OpenGlProfileHint::Core));
     #[cfg(target_os = "macos")]
     glfw.window_hint(glfw::WindowHint::OpenGlForwardCompat(true));
