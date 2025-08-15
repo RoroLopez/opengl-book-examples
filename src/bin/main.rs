@@ -20,7 +20,10 @@ fn main() {
     window.make_current();
 
     // GLAD OpenGL function pointers
-    gl::load_with(|symbol| window.get_proc_address(symbol) as *const _);
+    gl::load_with(|symbol| match window.get_proc_address(symbol) {
+        Some(f) => f as *const _,
+        None => std::ptr::null(),
+    });
 
     let mut wireframe_mode = false;
     while !window.should_close() {

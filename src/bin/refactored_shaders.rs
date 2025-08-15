@@ -21,7 +21,10 @@ fn main() {
     window.make_current();
 
     // GLAD OpenGL function pointers
-    gl::load_with(|symbol| window.get_proc_address(symbol) as *const _);
+    gl::load_with(|symbol| match window.get_proc_address(symbol) {
+        Some(f) => f as *const _,
+        None => ptr::null(),
+    });
 
     let vertex_program: &Path = Path::new("src/shaders/vertex/upside_down.vert");
     let fragment_program: &Path = Path::new("src/shaders/fragment/simple_fragment.frag");

@@ -38,7 +38,11 @@ fn main() {
     window.make_current();
 
     // GLAD OpenGL function pointers
-    gl::load_with(|symbol| window.get_proc_address(symbol) as *const _);
+    // gl::load_with(|symbol| window.get_proc_address(symbol) as *const _);
+    gl::load_with(|symbol| match window.get_proc_address(symbol) {
+        Some(f) => f as *const _,
+        None => std::ptr::null(),
+    });
 
     // Exploring...
     unsafe {
@@ -151,25 +155,25 @@ fn main() {
         gl::BindVertexArray(vao);
 
         gl::GenBuffers(1, &mut vbo);
-        // gl::GenBuffers(1, &mut ebo);
+        gl::GenBuffers(1, &mut ebo);
 
         gl::BindBuffer(gl::ARRAY_BUFFER, vbo);
         gl::BufferData(
             gl::ARRAY_BUFFER,
             // size_of_val(&vertices) as isize, // use only when size of value is not known at compile time
-            (t_vertices.len() * size_of::<f32>()) as isize,
-            t_vertices.as_ptr().cast(),
+            (rectangle_vertices.len() * size_of::<f32>()) as isize,
+            rectangle_vertices.as_ptr().cast(),
             gl::STATIC_DRAW
         );
 
         // for rendering rectangle ONLY
-        // gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, ebo);
-        // gl::BufferData(
-        //     gl::ELEMENT_ARRAY_BUFFER,
-        //     (indices.len() * size_of::<u32>()) as isize,
-        //     indices.as_ptr().cast(),
-        //     gl::STATIC_DRAW
-        // );
+        gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, ebo);
+        gl::BufferData(
+            gl::ELEMENT_ARRAY_BUFFER,
+            (indices.len() * size_of::<u32>()) as isize,
+            indices.as_ptr().cast(),
+            gl::STATIC_DRAW
+        );
 
         gl::VertexAttribPointer(
             0,
@@ -198,8 +202,8 @@ fn main() {
 
             gl::UseProgram(shader_program);
             gl::BindVertexArray(vao);
-            gl::DrawArrays(gl::TRIANGLES, 0, 12);
-            // gl::DrawElements(gl::TRIANGLES, 6, gl::UNSIGNED_INT, ptr::null());
+            // gl::DrawArrays(gl::TRIANGLES, 0, 12);
+            gl::DrawElements(gl::TRIANGLES, 6, gl::UNSIGNED_INT, ptr::null());
             gl::BindVertexArray(0);
         }
 

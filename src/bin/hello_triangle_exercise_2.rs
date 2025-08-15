@@ -47,7 +47,10 @@ fn main() {
     window.make_current();
 
     // GLAD OpenGL function pointers
-    gl::load_with(|symbol| window.get_proc_address(symbol) as *const _);
+    gl::load_with(|symbol| match window.get_proc_address(symbol) {
+        Some(f) => f as *const _,
+        None => std::ptr::null(),
+    });
 
     let c_str_vert = CString::new(VERTEX_SHADER_SOURCE.as_bytes()).unwrap();
     let c_str_frag = CString::new(FRAGMENT_SHADER_SOURCE.as_bytes()).unwrap();
