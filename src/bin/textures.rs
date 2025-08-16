@@ -1,5 +1,5 @@
-use glfw::{Context};
-use opengl_book_examples::utils::{handle_window_event};
+use std::ffi::CString;
+use glfw::{Action, Context, Key};
 use opengl_book_examples::shaders::{Shader, ShaderProgram, ShaderType};
 use std::path::Path;
 use std::ptr;
@@ -49,8 +49,8 @@ fn main() {
         _ => {}
     };
 
-    let (vao, texture) = unsafe {
-        let (mut internal_vao, mut internal_texture) = (0, 0);
+    let (vao, texture1, texture2) = unsafe {
+        let (mut internal_vao, mut internal_texture1, mut internal_texture2) = (0, 0, 0);
 
         let vertices: [f32; 32] = [
             // positions     // colors      // texture coords
@@ -65,8 +65,8 @@ fn main() {
         ];
 
         // Texture configuration
-        gl::GenTextures(1, &mut internal_texture);
-        gl::BindTexture(gl::TEXTURE_2D, internal_texture);
+        gl::GenTextures(1, &mut internal_texture1);
+        gl::BindTexture(gl::TEXTURE_2D, internal_texture1);
         // set the texture wrapping/filtering options (on the currently bound texture object)
         gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_WRAP_S, gl::REPEAT as i32);
         gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_WRAP_T, gl::REPEAT as i32);
@@ -75,7 +75,7 @@ fn main() {
         // load and generate the texture
         let img_source: String = "src/textures/container.jpg".to_string();
         let img = match image::open(img_source) {
-            Ok(img) => img,
+            Ok(img) => img.rotate180(),
             Err(e) => {
                 panic!("Failed to load image: {}", e.to_string())
             }
@@ -91,6 +91,36 @@ fn main() {
             gl::RGB,
             gl::UNSIGNED_BYTE,
             img.as_bytes().as_ptr().cast()
+        );
+        gl::GenerateMipmap(gl::TEXTURE_2D);
+
+        // Texture configuration
+        gl::GenTextures(1, &mut internal_texture2);
+        gl::BindTexture(gl::TEXTURE_2D, internal_texture2);
+        // set the texture wrapping/filtering options (on the currently bound texture object)
+        gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_WRAP_S, gl::REPEAT as i32);
+        gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_WRAP_T, gl::REPEAT as i32);
+        gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MIN_FILTER, gl::LINEAR_MIPMAP_LINEAR as i32);
+        gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MAG_FILTER, gl::LINEAR as i32);
+        // load and generate the texture
+        let img_source2: String = "src/textures/awesomeface.png".to_string();
+        let img2 = match image::open(img_source2) {
+            Ok(img) => img.flipv(),
+            Err(e) => {
+                panic!("Failed to load image: {}", e.to_string())
+            }
+        };
+
+        gl::TexImage2D(
+            gl::TEXTURE_2D,
+            0,
+            gl::RGB as i32,
+            img2.width() as i32,
+            img2.height() as i32,
+            0,
+            gl::RGBA,
+            gl::UNSIGNED_BYTE,
+            img2.as_bytes().as_ptr().cast()
         );
         gl::GenerateMipmap(gl::TEXTURE_2D);
 
@@ -152,15 +182,20 @@ fn main() {
         );
         gl::EnableVertexAttribArray(2);
 
-        (internal_vao, internal_texture)
+        (internal_vao, internal_texture1, internal_texture2)
     };
 
-    let mut wireframe_mode = false;
+    let tex1: CString = CString::new("texture1").unwrap();
+    let tex2: CString = CString::new("texture2").unwrap();
+
+    unsafe { gl::UseProgram(shader_program.shader_program_id); }
+    shader_program.set_int(tex1, 0);
+    shader_program.set_int(tex2, 1);
 
     while !window.should_close() {
         // Input
         for (_, event) in glfw::flush_messages(&events) {
-            handle_window_event(&mut window, event, &mut wireframe_mode);
+            handle_window_event(&mut window, event, &shader_program);
         }
 
         // Rendering
@@ -168,8 +203,11 @@ fn main() {
             gl::ClearColor(0.2, 0.3, 0.3, 1.0);
             gl::Clear(gl::COLOR_BUFFER_BIT);
 
-            gl::UseProgram(shader_program.shader_program_id);
-            gl::BindTexture(gl::TEXTURE_2D, texture);
+            gl::ActiveTexture(gl::TEXTURE0);
+            gl::BindTexture(gl::TEXTURE_2D, texture1);
+            gl::ActiveTexture(gl::TEXTURE1);
+            gl::BindTexture(gl::TEXTURE_2D, texture2);
+
             gl::BindVertexArray(vao);
 
             gl::DrawElements(gl::TRIANGLES, 6, gl::UNSIGNED_INT, ptr::null());
@@ -179,5 +217,33 @@ fn main() {
         // Check call events and swap the buffers
         glfw.poll_events();
         window.swap_buffers();
+    }
+}
+
+pub fn handle_window_event(window: &mut glfw::Window, event: glfw::WindowEvent, shader_program: &ShaderProgram) {
+    match event {
+        glfw::WindowEvent::FramebufferSize(width, height) => {
+            unsafe { gl::Viewport(0, 0, width, height) }
+        }
+        glfw::WindowEvent::Key(Key::Escape, _, Action::Press, _) => {
+            window.set_should_close(true)
+        }
+        glfw::WindowEvent::Key(Key::Up, _, Action::Press, _) => {
+            let visibility: CString = CString::new("visibility").unwrap();
+            let mut value = shader_program.get_float(&visibility);
+            value += 0.1;
+            if value <= 1.0 {
+                shader_program.set_float(visibility, value);
+            }
+        }
+        glfw::WindowEvent::Key(Key::Down, _, Action::Press, _) => {
+            let visibility: CString = CString::new("visibility").unwrap();
+            let mut value = shader_program.get_float(&visibility);
+            value -= 0.1;
+            if value >= 0.0 {
+                shader_program.set_float(visibility, value);
+            }
+        }
+        _ => {}
     }
 }

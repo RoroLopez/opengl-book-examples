@@ -162,11 +162,29 @@ pub mod shaders {
             }
         }
 
+        pub fn get_int(&self, name: CString) -> i32 {
+            unsafe {
+                let location: i32 = gl::GetUniformLocation(self.shader_program_id, name.as_ptr());
+                let mut value: i32 = 0;
+                gl::GetUniformiv(self.shader_program_id, location, &mut value);
+                value
+            }
+        }
+
         pub fn set_float(&self, name: CString, value: f32) {
             unsafe {
                 gl::Uniform1f(
                     gl::GetUniformLocation(self.shader_program_id, name.as_ptr()),
                     value)
+            }
+        }
+
+        pub fn get_float(&self, name: &CString) -> f32 {
+            unsafe {
+                let location: i32 = gl::GetUniformLocation(self.shader_program_id, name.as_ptr());
+                let mut value: f32 = 0.0;
+                gl::GetUniformfv(self.shader_program_id, location, &mut value);
+                value
             }
         }
 
