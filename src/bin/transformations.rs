@@ -1,3 +1,4 @@
+use glam::f32::{Vec3, Mat4};
 use std::ffi::CString;
 use glfw::{Action, Context, Key};
 use opengl_book_examples::shaders::{Shader, ShaderProgram, ShaderType};
@@ -25,8 +26,12 @@ fn main() {
         None => ptr::null(),
     });
 
-    let vertex_program: &Path = Path::new("src/shaders/vertex/texture.vert");
+    let vertex_program: &Path = Path::new("src/shaders/vertex/transformation.vert");
     let fragment_program: &Path = Path::new("src/shaders/fragment/texture.frag");
+
+    // let mut trans = Mat4::IDENTITY;
+    // trans = trans * Mat4::from_axis_angle(Vec3::new(0.0, 0.0, 1.0), std::f32::consts::PI / 2.0);
+    // trans = trans * Mat4::from_scale(Vec3::new(0.5, 0.5, 0.5));
 
     let vertex_shader_id = match Shader::load_shader(ShaderType::Vertex, vertex_program) {
         Ok(id) => id,
@@ -126,7 +131,6 @@ fn main() {
 
         // Linking Vertex Attributes
         let (mut vbo, mut ebo) = (0, 0);
-
         gl::GenVertexArrays(1, &mut internal_vao);
         gl::BindVertexArray(internal_vao);
 
@@ -192,6 +196,12 @@ fn main() {
     shader_program.set_int(&tex1, 0);
     shader_program.set_int(&tex2, 1);
 
+    // let name = CString::new("transform").unwrap();
+    // unsafe {
+    //     let location = gl::GetUniformLocation(shader_program.shader_program_id, name.as_ptr());
+    //     gl::UniformMatrix4fv(location, 1, gl::FALSE, &trans.to_cols_array()[0]);
+    // };
+
     while !window.should_close() {
         // Input
         for (_, event) in glfw::flush_messages(&events) {
@@ -208,9 +218,26 @@ fn main() {
             gl::ActiveTexture(gl::TEXTURE1);
             gl::BindTexture(gl::TEXTURE_2D, texture2);
 
-            gl::BindVertexArray(vao);
+            let mut trans = Mat4::IDENTITY;
+            let time = unsafe {
+                glfw::ffi::glfwGetTime() as f32
+            };
+            trans = trans * Mat4::from_translation(Vec3::new(0.5, -0.5, 0.0));
+            trans = trans * Mat4::from_rotation_z(time);
 
+            let name = CString::new("transform").unwrap();
+            let location = gl::GetUniformLocation(shader_program.shader_program_id, name.as_ptr());
+            gl::UniformMatrix4fv(location, 1, gl::FALSE, &trans.to_cols_array()[0]);
+            gl::BindVertexArray(vao);
             gl::DrawElements(gl::TRIANGLES, 6, gl::UNSIGNED_INT, ptr::null());
+
+            trans = Mat4::IDENTITY;
+            trans = trans * Mat4::from_translation(Vec3::new(-0.5, 0.5, 0.0));
+            let scale_amount: f32 = f32::sin(glfw::ffi::glfwGetTime() as f32);
+            trans = trans * Mat4::from_scale(Vec3::new(scale_amount, scale_amount, scale_amount));
+            gl::UniformMatrix4fv(location, 1, gl::FALSE, &trans.to_cols_array()[0]);
+            gl::DrawElements(gl::TRIANGLES, 6, gl::UNSIGNED_INT, ptr::null());
+
             gl::BindVertexArray(0);
         }
 

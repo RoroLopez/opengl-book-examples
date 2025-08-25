@@ -1,4 +1,4 @@
-use glfw::{Action, Context, Key};
+use glfw::{Context};
 use opengl_book_examples::utils::{handle_window_event};
 
 /// This file is the basis for all the exercises of OpenGL as well as the loop for processing

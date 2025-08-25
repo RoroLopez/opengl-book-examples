@@ -154,7 +154,7 @@ pub mod shaders {
             }
         }
 
-        pub fn set_int(&self, name: CString, value: u32) {
+        pub fn set_int(&self, name: &CString, value: u32) {
             unsafe {
                 gl::Uniform1i(
                     gl::GetUniformLocation(self.shader_program_id, name.as_ptr()),
