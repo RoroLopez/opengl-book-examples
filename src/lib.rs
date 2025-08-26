@@ -1,5 +1,5 @@
 pub mod shaders {
-    use std::ffi::CString;
+    use std::ffi::{CStr, CString};
     use std::fs::File;
     use std::io::{Error, ErrorKind, Read};
     use std::path::{Path};
@@ -146,7 +146,13 @@ pub mod shaders {
             Ok(())
         }
 
-        pub fn set_bool(&self, name: CString, value: bool) {
+        pub fn use_program(&self) {
+            unsafe {
+                gl::UseProgram(self.shader_program_id);
+            }
+        }
+
+        pub fn set_bool(&self, name: &CStr, value: bool) {
             unsafe {
                 gl::Uniform1i(
                     gl::GetUniformLocation(self.shader_program_id, name.as_ptr()),
@@ -154,7 +160,7 @@ pub mod shaders {
             }
         }
 
-        pub fn set_int(&self, name: &CString, value: u32) {
+        pub fn set_int(&self, name: &CStr, value: u32) {
             unsafe {
                 gl::Uniform1i(
                     gl::GetUniformLocation(self.shader_program_id, name.as_ptr()),
@@ -162,7 +168,7 @@ pub mod shaders {
             }
         }
 
-        pub fn get_int(&self, name: CString) -> i32 {
+        pub fn get_int(&self, name: &CStr) -> i32 {
             unsafe {
                 let location: i32 = gl::GetUniformLocation(self.shader_program_id, name.as_ptr());
                 let mut value: i32 = 0;
@@ -171,7 +177,7 @@ pub mod shaders {
             }
         }
 
-        pub fn set_float(&self, name: CString, value: f32) {
+        pub fn set_float(&self, name: &CStr, value: f32) {
             unsafe {
                 gl::Uniform1f(
                     gl::GetUniformLocation(self.shader_program_id, name.as_ptr()),
@@ -179,7 +185,7 @@ pub mod shaders {
             }
         }
 
-        pub fn get_float(&self, name: &CString) -> f32 {
+        pub fn get_float(&self, name: &CStr) -> f32 {
             unsafe {
                 let location: i32 = gl::GetUniformLocation(self.shader_program_id, name.as_ptr());
                 let mut value: f32 = 0.0;
@@ -188,7 +194,7 @@ pub mod shaders {
             }
         }
 
-        pub fn set_float4(&self, name: CString, values: (f32, f32, f32, f32)) {
+        pub fn set_float4(&self, name: &CStr, values: (f32, f32, f32, f32)) {
             unsafe {
                 gl::Uniform4f(
                     gl::GetUniformLocation(self.shader_program_id, name.as_ptr()),

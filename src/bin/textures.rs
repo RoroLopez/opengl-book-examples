@@ -1,4 +1,4 @@
-use std::ffi::CString;
+use std::ffi::{CStr, CString};
 use glfw::{Action, Context, Key};
 use opengl_book_examples::shaders::{Shader, ShaderProgram, ShaderType};
 use std::path::Path;
@@ -229,16 +229,16 @@ pub fn handle_window_event(window: &mut glfw::Window, event: glfw::WindowEvent, 
             window.set_should_close(true)
         }
         glfw::WindowEvent::Key(Key::Up, _, Action::Press, _) => {
-            let visibility: CString = CString::new("visibility").unwrap();
-            let mut value = shader_program.get_float(&visibility);
+            let visibility: &CStr = c"visibility";
+            let mut value = shader_program.get_float(visibility);
             value += 0.1;
             if value <= 1.0 {
                 shader_program.set_float(visibility, value);
             }
         }
         glfw::WindowEvent::Key(Key::Down, _, Action::Press, _) => {
-            let visibility: CString = CString::new("visibility").unwrap();
-            let mut value = shader_program.get_float(&visibility);
+            let visibility: &CStr = c"visibility";
+            let mut value = shader_program.get_float(visibility);
             value -= 0.1;
             if value >= 0.0 {
                 shader_program.set_float(visibility, value);
