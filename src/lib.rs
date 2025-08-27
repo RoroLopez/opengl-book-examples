@@ -257,7 +257,7 @@ pub mod utils {
             glfw::WindowEvent::Key(Key::Escape, _, Action::Press, _) => {
                 window.set_should_close(true)
             }
-            glfw::WindowEvent::Key(Key::W, _, Action::Press, _) => {
+            glfw::WindowEvent::Key(Key::LeftControl, _, Action::Press, _) => {
                 // WireFrame mod
                 if *wireframe_mode {
                     unsafe { gl::PolygonMode(gl::FRONT_AND_BACK, gl::FILL); }
