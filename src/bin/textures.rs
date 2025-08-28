@@ -1,6 +1,6 @@
 use std::ffi::{CStr, CString};
 use glfw::{Action, Context, Key};
-use opengl_book_examples::shaders::{Shader, ShaderProgram, ShaderType};
+use opengl_book_examples::shaders::shaders::{Shader, ShaderProgram, ShaderType};
 use std::path::Path;
 use std::ptr;
 
@@ -103,7 +103,7 @@ fn main() {
         gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MIN_FILTER, gl::LINEAR_MIPMAP_LINEAR as i32);
         gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MAG_FILTER, gl::LINEAR as i32);
         // load and generate the texture
-        let img_source2: String = "src/textures/awesomeface.png".to_string();
+        let img_source2: String = "src/textures/calamardo.jpg".to_string();
         let img2 = match image::open(img_source2) {
             Ok(img) => img.flipv(),
             Err(e) => {
@@ -118,7 +118,7 @@ fn main() {
             img2.width() as i32,
             img2.height() as i32,
             0,
-            gl::RGBA,
+            gl::RGB,
             gl::UNSIGNED_BYTE,
             img2.as_bytes().as_ptr().cast()
         );

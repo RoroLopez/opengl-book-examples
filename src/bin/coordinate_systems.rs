@@ -3,8 +3,8 @@ use std::path::Path;
 use std::ptr;
 use glam::f32::{Vec3, Mat4};
 use glfw::{Context};
-use opengl_book_examples::shaders::{Shader, ShaderProgram, ShaderType};
-use opengl_book_examples::utils::{handle_window_event};
+use opengl_book_examples::shaders::shaders::{Shader, ShaderProgram, ShaderType};
+use opengl_book_examples::common::common::handle_window_event_original;
 
 fn main() {
     let mut glfw = glfw::init(glfw::fail_on_errors).unwrap();
@@ -247,7 +247,7 @@ fn main() {
     while !window.should_close() {
         // Input
         for (_, event) in glfw::flush_messages(&events) {
-            handle_window_event(&mut window, event, &mut wireframe_mode);
+            handle_window_event_original(&mut window, event, &mut wireframe_mode);
         }
 
         // let model_matrix: Mat4 = Mat4::IDENTITY * Mat4::from_rotation_x(-45.0);

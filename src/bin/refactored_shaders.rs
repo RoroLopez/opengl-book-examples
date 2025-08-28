@@ -1,9 +1,8 @@
-use std::ffi::CString;
 use std::path::Path;
 use std::ptr;
 use glfw::{Context};
-use opengl_book_examples::shaders::{ShaderProgram, Shader, ShaderType};
-use opengl_book_examples::utils::{handle_window_event};
+use opengl_book_examples::shaders::shaders::{ShaderProgram, Shader, ShaderType};
+use opengl_book_examples::common::common::handle_window_event_original;
 
 fn main() {
     let mut glfw = glfw::init(glfw::fail_on_errors).unwrap();
@@ -110,7 +109,7 @@ fn main() {
     while !window.should_close() {
         // Input
         for (_, event) in glfw::flush_messages(&events) {
-            handle_window_event(&mut window, event, &mut wireframe_mode);
+            handle_window_event_original(&mut window, event, &mut wireframe_mode);
         }
 
         // Rendering

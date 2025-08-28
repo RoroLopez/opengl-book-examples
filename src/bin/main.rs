@@ -1,5 +1,5 @@
 use glfw::{Context};
-use opengl_book_examples::utils::{handle_window_event};
+use opengl_book_examples::common::common::handle_window_event_original;
 
 /// This file is the basis for all the exercises of OpenGL as well as the loop for processing
 /// any user input. The main loop consists always of taking Input, Rendering and Check call events
@@ -29,7 +29,7 @@ fn main() {
     while !window.should_close() {
         // Input
         for (_, event) in glfw::flush_messages(&events) {
-            handle_window_event(&mut window, event, &mut wireframe_mode);
+            handle_window_event_original(&mut window, event, &mut wireframe_mode);
         }
 
         // Rendering

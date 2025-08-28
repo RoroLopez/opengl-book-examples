@@ -3,7 +3,7 @@ use glfw::{Context};
 use std::ffi::{CStr, CString};
 use std::{ptr};
 use gl::types::{GLsizei};
-use opengl_book_examples::utils::handle_window_event;
+use opengl_book_examples::common::common::handle_window_event_original;
 
 const VERTEX_SHADER_SOURCE: &str = r#"
     #version 330 core
@@ -192,7 +192,7 @@ fn main() {
 
         // Input
         for (_, event) in glfw::flush_messages(&events) {
-            handle_window_event(&mut window, event, &mut wireframe_mode);
+            handle_window_event_original(&mut window, event, &mut wireframe_mode);
         }
 
         // Rendering

@@ -1,7 +1,7 @@
 use glam::f32::{Vec3, Mat4};
 use std::ffi::{CStr, CString};
 use glfw::{Action, Context, Key};
-use opengl_book_examples::shaders::{Shader, ShaderProgram, ShaderType};
+use opengl_book_examples::shaders::shaders::{Shader, ShaderProgram, ShaderType};
 use std::path::Path;
 use std::ptr;
 
