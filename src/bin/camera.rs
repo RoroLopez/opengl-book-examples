@@ -57,13 +57,13 @@ fn main() {
     };
 
     // Texture setup
-    let texture1 = match Texture::load_texture(Path::new("src/textures/container.jpg")) {
+    let texture1 = match Texture::load_texture(Path::new("src/textures/container.jpg"), false) {
         Ok(id) => id,
         Err(e) => {
             panic!("{}", e.to_string())
         }
     };
-    let texture2 = match Texture::load_texture(Path::new("src/textures/calamardo.jpg")) {
+    let texture2 = match Texture::load_texture(Path::new("src/textures/calamardo.jpg"), false) {
         Ok(id) => id,
         Err(e) => {
             panic!("{}", e.to_string())
@@ -235,9 +235,18 @@ fn main() {
 
             gl::BindVertexArray(vao);
             for (i, v) in cube_positions.iter().enumerate() {
-                // let angle: f32 = 20.0f32.to_radians() * (0.5f32 + i as f32) * glfw::ffi::glfwGetTime() as f32;
-                let angle: f32 = 20.0f32.to_radians() * i as f32;
-                let model_matrix = Mat4::IDENTITY * Mat4::from_translation(*v) * Mat4::from_axis_angle(Vec3::new(1.0, 0.3, 0.5).normalize(), angle);
+                let radius = 10.0;
+                let angle: f32 = 10.0f32.to_radians() * (0.5f32 + i as f32) * glfw::ffi::glfwGetTime() as f32;
+                // let angle: f32 = 20.0f32.to_radians() * i as f32;
+                let rot_x = v.x * angle.cos() - v.z * angle.sin();
+                // let rot_z = v.y * angle.cos() - v.z * angle.sin();
+                let rot_z = v.x * angle.sin() + v.z * angle.cos();
+                let v_rotated = Vec3::new(rot_x, v.y, rot_z).normalize();
+                let model_matrix =
+                    Mat4::IDENTITY * Mat4::from_translation(*v)
+                    * Mat4::from_axis_angle(Vec3::new(0.0, 1.0, 0.0).normalize(), angle)
+                    * Mat4::from_translation(-v_rotated)
+                    * Mat4::from_translation(*v);
 
                 let model_cstr: &CStr = c"model";
                 let model_location = gl::GetUniformLocation(shader_program.shader_program_id, model_cstr.as_ptr());

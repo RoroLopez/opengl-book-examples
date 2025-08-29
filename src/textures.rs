@@ -3,12 +3,13 @@ pub mod textures {
     use image::{DynamicImage, ImageError};
 
     pub struct Texture {
-        texture_id: u32
+        texture_id: u32,
+        is_png: bool
     }
 
     impl Texture {
-        pub fn load_texture<P: AsRef<Path>>(texture_path: P) -> Result<u32, ImageError> {
-            let texture = Self::create_texture();
+        pub fn load_texture<P: AsRef<Path>>(texture_path: P, is_png: bool) -> Result<u32, ImageError> {
+            let texture = Self::create_texture(is_png);
             texture.configure_texture();
             let img = image::open(texture_path)?.flipv();
 
@@ -24,6 +25,12 @@ pub mod textures {
         }
 
         fn create_texture_image(&self, img: DynamicImage) {
+            let format =
+                if self.is_png {
+                    gl::RGBA
+                } else {
+                    gl::RGB
+                };
             unsafe {
                 gl::TexImage2D(
                     gl::TEXTURE_2D,
@@ -32,7 +39,7 @@ pub mod textures {
                     img.width() as i32,
                     img.height() as i32,
                     0,
-                    gl::RGB,
+                    format,
                     gl::UNSIGNED_BYTE,
                     img.as_bytes().as_ptr().cast()
                 );
@@ -49,12 +56,12 @@ pub mod textures {
             }
         }
 
-        fn create_texture() -> Self {
+        fn create_texture(is_png: bool) -> Self {
             let mut texture_id = 0;
             unsafe {
                 gl::GenTextures(1, &mut texture_id);
             }
-            Texture { texture_id }
+            Texture { texture_id, is_png }
         }
     }
 }
