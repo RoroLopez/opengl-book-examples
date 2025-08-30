@@ -5,7 +5,9 @@ pub mod camera {
         FORWARD,
         BACKWARD,
         RIGHT,
-        LEFT
+        LEFT,
+        UP,
+        DOWN
     }
 
     pub struct Camera {
@@ -66,6 +68,12 @@ pub mod camera {
                 }
                 CameraMovement::LEFT => {
                     self.position -= velocity * self.right;
+                }
+                CameraMovement::UP => {
+                    self.position += velocity * self.up;
+                }
+                CameraMovement::DOWN => {
+                    self.position -= velocity * self.up;
                 }
             }
             if self.enable_fps {

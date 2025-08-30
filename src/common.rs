@@ -81,5 +81,11 @@ pub mod common {
         if window.get_key(Key::A) == Action::Press {
             camera.process_keyboard_movement(CameraMovement::LEFT, delta_time);
         }
+        if window.get_key(Key::Space) == Action::Press {
+            camera.process_keyboard_movement(CameraMovement::UP, delta_time);
+        }
+        if window.get_key(Key::Z) == Action::Press {
+            camera.process_keyboard_movement(CameraMovement::DOWN, delta_time);
+        }
     }
 }
