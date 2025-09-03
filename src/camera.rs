@@ -1,6 +1,7 @@
 pub mod camera {
     use glam::{Mat4, Vec3};
 
+    #[derive(Debug)]
     pub enum CameraMovement {
         FORWARD,
         BACKWARD,
@@ -24,7 +25,9 @@ pub mod camera {
         movement_speed: f32,
         mouse_sensitivity: f32,
         pub zoom: f32,
-        enable_fps: bool
+        // for fps setting
+        enable_fps: bool,
+        fixed_position_y: f32
     }
 
     impl Camera {
@@ -50,12 +53,13 @@ pub mod camera {
                 movement_speed: Camera::SPEED,
                 mouse_sensitivity: Camera::SENSITIVITY,
                 zoom: Camera::ZOOM,
-                enable_fps
+                enable_fps,
+                fixed_position_y: position.y
             }
         }
 
         pub fn process_keyboard_movement(&mut self, direction: CameraMovement, delta_time: f32) {
-            let velocity: f32 = Camera::SPEED * delta_time;
+            let velocity: f32 = self.movement_speed * delta_time;
             match direction {
                 CameraMovement::FORWARD => {
                     self.position += velocity * self.front;
@@ -71,13 +75,19 @@ pub mod camera {
                 }
                 CameraMovement::UP => {
                     self.position += velocity * self.up;
+                    if self.enable_fps {
+                        self.fixed_position_y = self.position.y;
+                    }
                 }
                 CameraMovement::DOWN => {
                     self.position -= velocity * self.up;
+                    if self.enable_fps {
+                        self.fixed_position_y = self.position.y;
+                    }
                 }
             }
             if self.enable_fps {
-                self.position.y = 0.0;
+                self.position.y = self.fixed_position_y;
             }
         }
 
