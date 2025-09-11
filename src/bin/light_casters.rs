@@ -1,6 +1,7 @@
+use std::ffi::CStr;
 use std::path::Path;
 use std::ptr;
-use glam::{Mat4, Vec3};
+use glam::{Mat4, Vec3, Vec4};
 use glfw::{Context};
 use opengl_book_examples::camera::camera::Camera;
 use opengl_book_examples::common::common::{handle_window_event, process_input};
@@ -15,7 +16,7 @@ fn main() {
     glfw.window_hint(glfw::WindowHint::OpenGlForwardCompat(true));
 
     let (mut window, events) =
-        glfw.create_window(800, 600, "Diffuse & specular maps exercise", glfw::WindowMode::Windowed)
+        glfw.create_window(800, 600, "Shaders exercise", glfw::WindowMode::Windowed)
             .expect("Failed to create GLFW window.");
 
     // OpenGL state setup
@@ -41,7 +42,7 @@ fn main() {
             panic!("{}", e.to_string())
         }
     };
-    let cube_object_frag_shader = match Shader::load_shader(ShaderType::Fragment, Path::new("src/shaders/fragment/specular_diffuse.frag")) {
+    let cube_object_frag_shader = match Shader::load_shader(ShaderType::Fragment, Path::new("src/shaders/fragment/spotlight.frag")) {
         Ok(id) => id,
         Err(e) => {
             panic!("{}", e.to_string())
@@ -66,13 +67,13 @@ fn main() {
         },
         _ => {}
     };
-    let lamp: ShaderProgram = ShaderProgram::new();
-    match lamp.build(&[lamp_vert_shader, lamp_frag_shader]) {
-        Err(e) => {
-            panic!("{}", e.to_string())
-        },
-        _ => {}
-    };
+    // let lamp: ShaderProgram = ShaderProgram::new();
+    // match lamp.build(&[lamp_vert_shader, lamp_frag_shader]) {
+    //     Err(e) => {
+    //         panic!("{}", e.to_string())
+    //     },
+    //     _ => {}
+    // };
 
     // Texture setup
     let texture1 = match Texture::load_texture(Path::new("src/textures/wooden-container-with-metal-frame.png"), true) {
@@ -87,15 +88,10 @@ fn main() {
             panic!("{}", e.to_string())
         }
     };
-    let texture3 = match Texture::load_texture(Path::new("src/textures/emission2.png"), true) {
-        Ok(id) => id,
-        Err(e) => {
-            panic!("{}", e.to_string())
-        }
-    };
 
     let (cube_vao, light_vao) = unsafe {
-        let (mut internal_vao, mut internal_light_vao) = (0, 0);
+        let mut internal_vao = 0;
+        let mut internal_light_vao = 0;
 
         let cube_vertices: [f32; 288] = [
             // positions       // normals        // texture coords
@@ -202,6 +198,7 @@ fn main() {
         );
         gl::EnableVertexAttribArray(0);
 
+
         (internal_vao, internal_light_vao)
     };
     unsafe { gl::Enable(gl::DEPTH_TEST); }
@@ -219,19 +216,29 @@ fn main() {
         true
     );
 
-    // let mut light_position = Vec3::new(1.2, -0.15, 2.0);
     let mut light_position = Vec3::new(1.2, 1.0, 2.0);
-    let mut light_lamp = Vec3::new(1.0, 1.0, 1.0);
+    let mut lamp_color = Vec3::new(1.0, 1.0, 1.0);
 
     let mut wireframe_mode = false;
     cube_object.use_program();
     cube_object.set_int(c"material.diffuse", 0);
     cube_object.set_int(c"material.specular", 1);
-    cube_object.set_int(c"material.emission", 2);
+
+    let cube_positions: [Vec3; 10] = [
+        Vec3::new( 0.0,  0.0,  0.0),
+        Vec3::new( 2.0,  5.0, -15.0),
+        Vec3::new(-1.5, -2.2, -2.5),
+        Vec3::new(-3.8, -2.0, -12.3),
+        Vec3::new( 2.4, -0.4, -3.5),
+        Vec3::new(-1.7,  3.0, -7.5),
+        Vec3::new( 1.3, -2.0, -2.5),
+        Vec3::new( 1.5,  2.0, -2.5),
+        Vec3::new( 1.5,  0.2, -1.5),
+        Vec3::new(-1.3,  1.0, -1.5)
+    ];
 
     // MAIN LOOP
     while !window.should_close() {
-        // println!("Camera position: {}", camera.position);
         // Input
         let current_frame: f32 = glfw.get_time() as f32;
         delta_time = current_frame - last_frame;
@@ -256,37 +263,31 @@ fn main() {
         // Rendering
         unsafe {
             gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
-            gl::ClearColor(0.0, 0.0, 0.0, 1.0);
+            gl::ClearColor(0.1, 0.1, 0.1, 1.0);
             gl::Clear(gl::COLOR_BUFFER_BIT);
 
             gl::ActiveTexture(gl::TEXTURE0);
             gl::BindTexture(gl::TEXTURE_2D, texture1);
             gl::ActiveTexture(gl::TEXTURE1);
             gl::BindTexture(gl::TEXTURE_2D, texture2);
-            gl::ActiveTexture(gl::TEXTURE2);
-            gl::BindTexture(gl::TEXTURE_2D, texture3);
 
             cube_object.use_program();
-            cube_object.set_vec3(c"lightColor", &light_lamp.to_array());
-            cube_object.set_vec3(c"lightPos", &light_position.to_array());
-            cube_object.set_float(c"material.shininess", 64.0);
+            // cube_object.set_vec3(c"lightPos", &light_position.to_array());
+            cube_object.set_float(c"material.shininess", 32.0);
 
-            cube_object.set_vec3(c"light.ambient", &[0.1, 0.1, 0.1]);
-            cube_object.set_vec3(c"light.diffuse", &[0.1, 0.1, 0.1]);
-            // light_lamp.x = (2.0 * glfw.get_time() as f32).sin();
-            // light_lamp.y = (0.7 * glfw.get_time() as f32).sin();
-            // light_lamp.z = (1.3 * glfw.get_time() as f32).sin();
-            // let diffuse_color = light_lamp * Vec3::new(0.5, 0.5, 0.5);
-            // let ambient_color = diffuse_color * Vec3::new(0.2, 0.2, 0.2);
-            // cube_object.set_vec3(c"light.ambient", (ambient_color.x, ambient_color.y, ambient_color.z));
-            // cube_object.set_vec3(c"light.diffuse", (diffuse_color.x, diffuse_color.y, diffuse_color.z));
+            // let light_direction = Vec3::new(-0.2, -1.0, -0.3);
+            // let light_direction = view_matrix * Vec4::new(-0.2, -1.0, -0.3, 0.0);
+            // cube_object.set_vec3(c"light.direction", &light_direction.to_array());
+            cube_object.set_float(c"light.cutOff", 12.5f32.to_radians().cos());
+            cube_object.set_float(c"light.outerCutOff", 17.5f32.to_radians().cos());
+            cube_object.set_vec3(c"light.ambient", &[0.2, 0.2, 0.2]);
+            cube_object.set_vec3(c"light.diffuse", &[0.5, 0.5, 0.5]);
             cube_object.set_vec3(c"light.specular", &[1.0, 1.0, 1.0]);
+            cube_object.set_float(c"light.constant", 1.0);
+            cube_object.set_float(c"light.linear", 0.09);
+            cube_object.set_float(c"light.quadratic", 0.032);
 
-            let time = 1.0 * glfw.get_time() as f32;
-            cube_object.set_float(c"time", time);
 
-            let angle: f32 = 60.0f32.to_radians() * glfw.get_time() as f32;
-            // let model_matrix = Mat4::IDENTITY * Mat4::from_axis_angle(Vec3::new(1.0, 0.3, 0.5).normalize(), angle);
             let model_matrix = Mat4::IDENTITY;
             let model_location = gl::GetUniformLocation(cube_object.shader_program_id, c"model".as_ptr());
             gl::UniformMatrix4fv(model_location, 1, gl::FALSE, &model_matrix.to_cols_array()[0]);
@@ -298,29 +299,34 @@ fn main() {
             gl::UniformMatrix4fv(model_location, 1, gl::FALSE, &projection_matrix.to_cols_array()[0]);
 
             gl::BindVertexArray(cube_vao);
-            gl::DrawArrays(gl::TRIANGLES, 0, 36);
+            for (i, v) in cube_positions.iter().enumerate() {
+                let angle = 20.0 * i as f32;
+                let model_matrix = Mat4::IDENTITY * Mat4::from_translation(*v) * Mat4::from_axis_angle(Vec3::new(1.0, 0.3, 0.5).normalize(), angle);
 
-            lamp.use_program();
-            lamp.set_vec3(c"lightColorSource", &light_lamp.to_array());
-            // light_position.x = 1.0 + glfw.get_time().sin() as f32 * 2.0;
-            // light_position.y = (glfw.get_time() / 2.0).sin() as f32;
-            // light_position.x = 2.0 * glfw.get_time().sin() as f32;
-            // light_position.y = (glfw.get_time().sin() / 3.0) as f32;
-            // light_position.z = 1.5 * glfw.get_time().cos() as f32;
-            let model_matrix = Mat4::IDENTITY * Mat4::from_translation(light_position) * Mat4::from_scale(Vec3::new(0.2, 0.2, 0.2));
-            let model_location = gl::GetUniformLocation(lamp.shader_program_id, c"model".as_ptr());
-            gl::UniformMatrix4fv(model_location, 1, gl::FALSE, &model_matrix.to_cols_array()[0]);
+                let model_cstr: &CStr = c"model";
+                let model_location = gl::GetUniformLocation(cube_object.shader_program_id, model_cstr.as_ptr());
+                gl::UniformMatrix4fv(model_location, 1, gl::FALSE, &model_matrix.to_cols_array()[0]);
 
-            let model_location = gl::GetUniformLocation(lamp.shader_program_id, c"view".as_ptr());
-            gl::UniformMatrix4fv(model_location, 1, gl::FALSE, &view_matrix.to_cols_array()[0]);
-
-            let model_location = gl::GetUniformLocation(lamp.shader_program_id, c"projection".as_ptr());
-            gl::UniformMatrix4fv(model_location, 1, gl::FALSE, &projection_matrix.to_cols_array()[0]);
-
-            gl::BindVertexArray(light_vao);
-            gl::DrawArrays(gl::TRIANGLES, 0, 36);
-
+                gl::DrawArrays(gl::TRIANGLES, 0, 36);
+            }
             gl::BindVertexArray(0);
+
+            // lamp.use_program();
+            // lamp.set_vec3(c"lightColorSource", &lamp_color.to_array());
+            //
+            // let model_matrix = Mat4::IDENTITY * Mat4::from_translation(light_position) * Mat4::from_scale(Vec3::new(0.2, 0.2, 0.2));
+            // let model_location = gl::GetUniformLocation(lamp.shader_program_id, c"model".as_ptr());
+            // gl::UniformMatrix4fv(model_location, 1, gl::FALSE, &model_matrix.to_cols_array()[0]);
+            //
+            // let model_location = gl::GetUniformLocation(lamp.shader_program_id, c"view".as_ptr());
+            // gl::UniformMatrix4fv(model_location, 1, gl::FALSE, &view_matrix.to_cols_array()[0]);
+            //
+            // let model_location = gl::GetUniformLocation(lamp.shader_program_id, c"projection".as_ptr());
+            // gl::UniformMatrix4fv(model_location, 1, gl::FALSE, &projection_matrix.to_cols_array()[0]);
+            //
+            // gl::BindVertexArray(light_vao);
+            // gl::DrawArrays(gl::TRIANGLES, 0, 36);
+            // gl::BindVertexArray(0);
         }
 
         // Check call events and swap the buffers

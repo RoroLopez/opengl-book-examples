@@ -223,12 +223,12 @@ fn main() {
 
             shader_program.use_program();
             // shader_program.set_vec3(c"objectColor", (1.0, 0.5, 0.31));
-            shader_program.set_vec3(c"lightColor", (light_lamp.x, light_lamp.y, light_lamp.z));
-            shader_program.set_vec3(c"lightPos", (light_position.x, light_position.y, light_position.z));
+            shader_program.set_vec3(c"lightColor", &light_lamp.to_array());
+            shader_program.set_vec3(c"lightPos", &light_position.to_array());
 
-            shader_program.set_vec3(c"material.ambient", (1.0, 1.0, 1.0));
-            shader_program.set_vec3(c"material.diffuse", (1.0, 1.0, 1.0));
-            shader_program.set_vec3(c"material.specular", (1.0, 1.0, 1.0));
+            shader_program.set_vec3(c"material.ambient", &[1.0, 1.0, 1.0]);
+            shader_program.set_vec3(c"material.diffuse", &[1.0, 1.0, 1.0]);
+            shader_program.set_vec3(c"material.specular", &[1.0, 1.0, 1.0]);
             shader_program.set_float(c"material.shininess", 32.0);
 
             // shader_program.set_vec3(c"light.ambient", (0.2, 0.2, 0.2));
@@ -238,9 +238,9 @@ fn main() {
             light_lamp.z = (1.3 * glfw.get_time() as f32).sin();
             let diffuse_color = light_lamp * Vec3::new(0.5, 0.5, 0.5);
             let ambient_color = diffuse_color * Vec3::new(0.2, 0.2, 0.2);
-            shader_program.set_vec3(c"light.ambient", (ambient_color.x, ambient_color.y, ambient_color.z));
-            shader_program.set_vec3(c"light.diffuse", (diffuse_color.x, diffuse_color.y, diffuse_color.z));
-            shader_program.set_vec3(c"light.specular", (1.0, 1.0, 1.0));
+            shader_program.set_vec3(c"light.ambient", &ambient_color.to_array());
+            shader_program.set_vec3(c"light.diffuse", &diffuse_color.to_array());
+            shader_program.set_vec3(c"light.specular", &[1.0, 1.0, 1.0]);
             // shader_program.set_vec3(c"viewPos", (camera.position.x, camera.position.y, camera.position.z));
 
             let model_matrix = Mat4::IDENTITY;
@@ -257,7 +257,7 @@ fn main() {
             gl::DrawArrays(gl::TRIANGLES, 0, 36);
 
             light_source_shader_program.use_program();
-            light_source_shader_program.set_vec3(c"lightColorSource", (light_lamp.x, light_lamp.y, light_lamp.z));
+            light_source_shader_program.set_vec3(c"lightColorSource", &light_lamp.to_array());
             // light_position.x = 1.0 + glfw.get_time().sin() as f32 * 2.0;
             // light_position.y = (glfw.get_time() / 2.0).sin() as f32;
             // light_position.x = 2.0 * glfw.get_time().sin() as f32;
