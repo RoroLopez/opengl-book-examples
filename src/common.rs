@@ -1,7 +1,11 @@
+/// Common module for all common functions used throughout programs, need to organize better for
+/// player movement and actual common functions
 pub mod common {
     use glfw::{Action, Key};
     use crate::camera::camera::{Camera, CameraMovement};
+    use crate::flashlight::flashlight::FlashLight;
 
+    // MUST DELETE THIS... NO LONGER USED
     pub fn handle_window_event_original(window: &mut glfw::Window, event: glfw::WindowEvent, wireframe_mode: &mut bool) {
         match event {
             glfw::WindowEvent::FramebufferSize(width, height) => {
@@ -29,6 +33,7 @@ pub mod common {
         last_x: &mut f32,
         last_y: &mut f32,
         camera: &mut Camera,
+        flashlight: &mut FlashLight,
         wireframe_mode: &mut bool,
     ) {
         match event {
@@ -56,6 +61,9 @@ pub mod common {
             glfw::WindowEvent::Key(Key::Escape, _, Action::Press, _) => {
                 window.set_should_close(true)
             }
+            glfw::WindowEvent::Key(Key::F, _, Action::Press, _) => {
+                flashlight.toggle();
+            }
             glfw::WindowEvent::Key(Key::LeftControl, _, Action::Press, _) => {
                 if *wireframe_mode {
                     unsafe { gl::PolygonMode(gl::FRONT_AND_BACK, gl::FILL); }
@@ -68,6 +76,8 @@ pub mod common {
         }
     }
 
+    // TODO: Need to add data structure for supporting multiple keys pressed with polling events
+    // refer to this link to implement such solution: https://stackoverflow.com/questions/46631814/handling-multiple-keys-input-at-once-with-glfw
     pub fn process_input(window: &glfw::Window, camera: &mut Camera, delta_time: f32) {
         if window.get_key(Key::W) == Action::Press {
             camera.process_keyboard_movement(CameraMovement::FORWARD, delta_time);

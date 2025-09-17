@@ -1,3 +1,4 @@
+/// Structure for all camera setup and camera movement
 pub mod camera {
     use glam::{Mat4, Vec3};
 

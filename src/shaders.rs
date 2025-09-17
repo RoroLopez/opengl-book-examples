@@ -206,7 +206,7 @@ pub mod shaders {
             }
         }
 
-        pub fn set_vec4(&self, name: &CStr, values: &[f32; 4]) {
+        pub fn set_vec4(&self, name: &CStr, values: &[f32]) {
             unsafe {
                 gl::Uniform4f(
                     gl::GetUniformLocation(self.shader_program_id, name.as_ptr()),
@@ -214,7 +214,7 @@ pub mod shaders {
             }
         }
 
-        pub fn set_vec3(&self, name: &CStr, values: &[f32; 3]) {
+        pub fn set_vec3(&self, name: &CStr, values: &[f32]) {
             unsafe {
                 gl::Uniform3f(
                     gl::GetUniformLocation(self.shader_program_id, name.as_ptr()),
