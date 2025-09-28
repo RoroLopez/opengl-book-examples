@@ -4,6 +4,7 @@ use glam::{Mat4, Vec3};
 use glfw::Context;
 use opengl_book_examples::camera::camera::Camera;
 use opengl_book_examples::common::common::{handle_window_event, process_input};
+use opengl_book_examples::flashlight::flashlight::FlashLight;
 use opengl_book_examples::shaders::shaders::{Shader, ShaderProgram, ShaderType};
 use opengl_book_examples::textures::textures::Texture;
 
@@ -164,6 +165,7 @@ fn main() {
         Vec3::new(0.0, 1.0, 0.0),
         true
     );
+    let mut flashlight: FlashLight = FlashLight::new(true);
 
     let mut wireframe_mode = false;
     let mut first_mouse = true;
@@ -184,6 +186,7 @@ fn main() {
                 &mut last_x,
                 &mut last_y,
                 &mut camera,
+                &mut flashlight,
                 &mut wireframe_mode
             );
         }

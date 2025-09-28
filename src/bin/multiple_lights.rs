@@ -217,10 +217,8 @@ fn main() {
         true
     );
     let mut flashlight: FlashLight = FlashLight::new(true);
-    
-    let mut lamp_color: Vec3 = Vec3::new(1.0, 1.0, 1.0);
 
-    let mut wireframe_mode: bool = false;
+    let mut wireframe_mode: Box<bool> = Box::new(false);
     cube.use_program();
     cube.set_int(c"material.diffuse", 0);
     cube.set_int(c"material.specular", 1);

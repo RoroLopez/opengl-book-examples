@@ -4,6 +4,7 @@ use glam::{Mat4, Vec3};
 use glfw::{Context};
 use opengl_book_examples::camera::camera::Camera;
 use opengl_book_examples::common::common::{handle_window_event, process_input};
+use opengl_book_examples::flashlight::flashlight::FlashLight;
 use opengl_book_examples::shaders::shaders::{Shader, ShaderProgram, ShaderType};
 use opengl_book_examples::textures::textures::Texture;
 
@@ -81,7 +82,7 @@ fn main() {
             panic!("{}", e.to_string())
         }
     };
-    let texture2 = match Texture::load_texture(Path::new("src/textures/steel-frame.png"), true) {
+    let texture2 = match Texture::load_texture(Path::new("src/textures/awesomeface.png"), true) {
         Ok(id) => id,
         Err(e) => {
             panic!("{}", e.to_string())
@@ -218,6 +219,7 @@ fn main() {
         Vec3::new(0.0, 1.0, 0.0),
         true
     );
+    let mut flashlight: FlashLight = FlashLight::new(true);
 
     // let mut light_position = Vec3::new(1.2, -0.15, 2.0);
     let mut light_position = Vec3::new(1.2, 1.0, 2.0);
@@ -245,6 +247,7 @@ fn main() {
                 &mut last_x,
                 &mut last_y,
                 &mut camera,
+                &mut flashlight,
                 &mut wireframe_mode
             );
         }
@@ -271,8 +274,8 @@ fn main() {
             cube_object.set_vec3(c"lightPos", &light_position.to_array());
             cube_object.set_float(c"material.shininess", 64.0);
 
-            cube_object.set_vec3(c"light.ambient", &[0.1, 0.1, 0.1]);
-            cube_object.set_vec3(c"light.diffuse", &[0.1, 0.1, 0.1]);
+            cube_object.set_vec3(c"light.ambient", &[0.2, 0.2, 0.2]);
+            cube_object.set_vec3(c"light.diffuse", &[0.5, 0.5, 0.5]);
             // light_lamp.x = (2.0 * glfw.get_time() as f32).sin();
             // light_lamp.y = (0.7 * glfw.get_time() as f32).sin();
             // light_lamp.z = (1.3 * glfw.get_time() as f32).sin();

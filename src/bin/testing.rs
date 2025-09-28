@@ -39,16 +39,12 @@ fn main () -> io::Result<()> {
     point_light_properties.insert("linear", vec![vec![0.09]; 4]);
     point_light_properties.insert("quadratic", vec![vec![0.032]; 4]);
 
-    // point lights setup
-    for field in &point_light_fields {
-        for i in 0..4 {
-            let mut point_light_name = format!("pointLights[{i}].");
-            point_light_name.push_str(field);
-            let property = point_light_properties.get(field).unwrap();
-            println!("Property: {} -- Value:{:?}", point_light_name, property[i]);
-        }
-    }
-    
+    let noodles = "noodles".to_string();
+    let oodles = &noodles[1..];
+    let mut doggy = "ಠ_ಠ";
+    doggy = "pudlly";
+    println!("{doggy}");
+
 
     // let bytes: &[u8] = s.as_ref();
     // let contents: &str = s.as_ref();

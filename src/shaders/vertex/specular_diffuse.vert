@@ -6,9 +6,9 @@ layout (location = 2) in vec2 aTexCoords;
 out vec3 FragPos;
 out vec3 Normal;
 out vec2 TexCoords;
-//out vec3 LightPos;
+out vec3 LightPos;
 
-//uniform vec3 lightPos;
+uniform vec3 lightPos;
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
@@ -17,7 +17,7 @@ void main()
 {
     gl_Position = projection * view * model * vec4(aPos, 1.0);
     FragPos = vec3(view * model * vec4(aPos, 1.0));
-//    LightPos = vec3(view * vec4(lightPos, 1.0));
+    LightPos = vec3(view * vec4(lightPos, 1.0));
     Normal = mat3(transpose(inverse(view * model))) * aNormal;
 //    TexCoords = vec2(view * vec4(aTexCoords, 0.0, 1.0)); // move texture inside object
     TexCoords = aTexCoords;
