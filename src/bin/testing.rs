@@ -1,6 +1,6 @@
-use std::collections::HashMap;
 use std::fs::File;
 use std::io::{self, BufRead, BufReader};
+use glam::{Vec2, Vec3};
 
 type GenericError = Box<dyn std::error::Error + Send + Sync + 'static>;
 type GenericResult<T> = Result<T, GenericError>;
@@ -16,6 +16,20 @@ fn read_numbers(file: &mut dyn BufRead) -> GenericResult<Vec<i64>> {
     Ok(numbers)
 }
 
+// #[repr(C)]
+struct Vertex {
+    position: Vec3,     // 12 bytes
+    normal: Vec3,       // 12 bytes
+    tex_coords: Vec2    // 8 bytes
+}
+
+#[repr(C)]
+struct VertexC {
+    position: Vec3,     // 12 bytes
+    normal: Vec3,       // 12 bytes
+    tex_coords: Vec2    // 8 bytes
+}
+
 fn main () -> io::Result<()> {
     let s = String::from("I am a new string");
     let path = "src/bin/numbers.txt";
@@ -28,16 +42,27 @@ fn main () -> io::Result<()> {
     let one_int: u32 = one.into();
     println!("Into bool: {}", one_int);
 
-    let point_light_fields = vec!["ambient", "diffuse", "specular", "constant", "linear", "quadratic"];
-    let mut point_light_properties: HashMap<&str, Vec<Vec<f32>>> = HashMap::new();
+    let offset_field1 = core::mem::offset_of!(Vertex, position);
+    let offset_field2 = core::mem::offset_of!(Vertex, normal);
+    let offset_field3 = core::mem::offset_of!(Vertex, tex_coords);
 
-    // properties setup
-    point_light_properties.insert("ambient", vec![vec![0.1, 0.1, 0.1], vec![0.1, 0.1, 0.1], vec![0.1, 0.1, 0.1], vec![0.1, 0.1, 0.1]]);
-    point_light_properties.insert("diffuse", vec![vec![1.0, 0.65, 0.0], vec![0.4, 0.3, 0.1], vec![1.0, 0.0, 0.0], vec![0.0, 0.0, 1.0]]);
-    point_light_properties.insert("specular", vec![vec![1.0, 1.0, 1.0]; 4]);
-    point_light_properties.insert("constant", vec![vec![1.0]; 4]);
-    point_light_properties.insert("linear", vec![vec![0.09]; 4]);
-    point_light_properties.insert("quadratic", vec![vec![0.032]; 4]);
+    println!("Offset of field1: {}", offset_field1);
+    println!("Offset of field2: {}", offset_field2);
+    println!("Offset of field3: {}", offset_field3);
+
+    let vertex_size: usize = size_of::<Vertex>();
+    println!("Size of vertex struct: {}", vertex_size);
+
+    let offset_field1 = core::mem::offset_of!(VertexC, position);
+    let offset_field2 = core::mem::offset_of!(VertexC, normal);
+    let offset_field3 = core::mem::offset_of!(VertexC, tex_coords);
+
+    println!("Offset of field1: {}", offset_field1);
+    println!("Offset of field2: {}", offset_field2);
+    println!("Offset of field3: {}", offset_field3);
+
+    let vertex_size: usize = size_of::<VertexC>();
+    println!("Size of vertexC struct: {}", vertex_size);
 
     let noodles = "noodles".to_string();
     let oodles = &noodles[1..];
